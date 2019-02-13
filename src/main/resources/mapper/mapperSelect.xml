@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.code.dao.selectDao">
+
+	<select id="select" parameterType="map" resultType="map">
+		SELECT * FROM modular m 
+		WHERE m.mid IN (SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(r.`rJurisdiction`,',',b.help_topic_id+1),',',-1) AS rootid  
+		FROM role r LEFT JOIN mysql.help_topic b 
+		ON b.help_topic_id &lt; (LENGTH(r.`rJurisdiction`)-LENGTH(REPLACE(r.`rJurisdiction`,',',''))+1) 
+		WHERE r.`rid`=${rid})
+	</select>
+	
+	
+	<select id="thisSelect" parameterType="map" resultType="map">
+	SELECT r.rid AS MID,r.rname AS mname,r.rJurisdiction AS murl FROM role  r
+	</select>
+
+</mapper>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- status 控制log4j2自身的日志级别； monitorInterval 控制log4j2的配置刷新时间，单位：秒 -->
+<Configuration monitorInterval="30" status="WARN">
+	<Properties>
+		<!-- 输出格式 -->
+		<Property name="AppServer_LOG_PATTERN"> 
+		     %d{yyyy-MM-dd HH:mm:ss}:%-5p %X{userid}-%X{account} [%thread] %c:%L - %m%n
+		</Property>
+	    </Properties>
+
+	<!-- <ThresholdFilter level ="debug"></ThresholdFilter> -->
+	<!-- 1.DynamicThresholdFilter 从整体上控制日志默认输出级别，对于特定的值可以调整日志级别 除了 jkdatest 
+		之外其他的日志都默认是ERROR级别，jkdatest 相关的日志是DEBUG级别 operator="or" -->
+	<DynamicThresholdFilter onMismatch="DENY" onMatch="ACCEPT" defaultThreshold="ERROR" key="account">
+		<KeyValuePair key="jkdatest" value="DEBUG" />
+		<KeyValuePair key="zhangpengfei" value="DEBUG" />
+		<KeyValuePair key="tblgly" value="DEBUG" />
+	</DynamicThresholdFilter>
+
+	<Appenders>
+		<!-- 这个输出控制台的配置 -->
+		<Console name="CONSOLE" target="SYSTEM_OUT">
+			<!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch） -->
+			<PatternLayout pattern="${AppServer_LOG_PATTERN}" />
+		</Console>
+
+		<!-- 日志文件 -->
+		<RollingFile name="RollingFile"
+			filePattern="../appServer_logs/jlogs/back/appServer.%d{yyyy-MM-dd}.log.gz"
+			fileName="../appServer_logs/jlogs/appServer.log">
+			<PatternLayout>
+				<Pattern>${AppServer_LOG_PATTERN}</Pattern>
+			</PatternLayout>
+			<Policies>
+				<!-- 大小超过size ,控制日志的生成，按照filePattern的匹配模式，为yyyy-MM-dd时以天为单位生成日志 -->
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="100 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+		</RollingFile>
+
+		<!-- 控制文件的记录内容，符合条件才记录到文件，其他都拒绝写入日志,只记录特定用户的日志信息 -->
+		<RollingFile name="TestUserLog" 
+		        filePattern="../appServer_logs/jlogs/back/appTestUser.%d{yyyy-MM-dd}.log.gz"
+			    fileName="../appServer_logs/jlogs/appTestUserLog.log" append="true">
+			<ThreadContextMapFilter onMatch="ACCEPT" onMismatch="DENY">
+				<KeyValuePair key="account" value="jkdatest" />
+			</ThreadContextMapFilter>
+			<PatternLayout>
+				<Pattern>${AppServer_LOG_PATTERN}</Pattern>
+			</PatternLayout>
+			<Policies>
+				<!-- 大小超过size ,控制日志的生成，按照filePattern的匹配模式，为yyyy-MM-dd时以天为单位生成日志 -->
+				<TimeBasedTriggeringPolicy modulate="true" interval="1" />
+				<SizeBasedTriggeringPolicy size="100 MB" />
+			</Policies>
+		   <DefaultRolloverStrategy max="30" />
+	</RollingFile> 
+	</Appenders>
+	<!--然后定义logger，只有定义了logger并引入的appender，appender才会生效 -->
+	<!--additivity="false",日记事件不会再传递到父logger -->
+	<Loggers>
+		<logger name="com.code.dao" level="DEBUG" />
+		<logger name="com.code.service" level="DEBUG" />
+		<logger name="com.code.controller" level="DEBUG" />
+		<logger name="org.springframework" level="INFO" />
+		<logger name="org.mybatis" level="INFO" />
+		<Root level="INFO">
+			<AppenderRef ref="CONSOLE" />
+			<AppenderRef ref="RollingFile" />
+			<AppenderRef ref="TestUserLog" />
+		</Root>
+	</Loggers>
+
+</Configuration>
