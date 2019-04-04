@@ -13,7 +13,9 @@
 	
 	
 	<select id="thisSelect" parameterType="map" resultType="map">
-	SELECT r.rid AS MID,r.rname AS mname,r.rJurisdiction AS murl FROM role  r
+	<!-- SELECT r.rid AS MID,r.rname AS mname,r.rJurisdiction AS murl FROM role  r -->
+	<!-- select * from hra00_03 where rownum=1 -->
+	select t.* from APPVERSION t where t.type='2'
 	</select>
 
 </mapper>

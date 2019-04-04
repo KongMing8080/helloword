@@ -13,9 +13,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.code.service.selectService;
 
+
 @Controller
 @RequestMapping("/select")
-public class selectController {
+public class selectController extends BaseController{
 
 	private static Logger log = LoggerFactory.getLogger(selectController.class);
 	
@@ -23,12 +24,14 @@ public class selectController {
 	private selectService selectService;
 	
 	@RequestMapping(value="/thisSelect")
-	public String thisSelect() {
-		Map<String, Object> params = new HashMap<String, Object>();
+	@ResponseBody
+	public Map<String, Object> thisSelect() {
+		Map<String, Object> m = null;
+		Map<String, Object> params = new HashMap<>();
 		List<Map<String, Object>> list = selectService.thisSelect(params);
+		m = this.getResultMap(true, list, "查询成功！");
 		System.out.println(list);
-		System.out.println("修改提交GIT测试");
-		return "login/login";
+		return m;
 	}
 	
 }
